@@ -29,929 +29,837 @@
           ShieldAlert, FileText, Activity, Globe, Smartphone, CheckCircle, Sparkles, X, Landmark, ArrowRightLeft, ChevronDown, ChevronUp, AlertTriangle, User, Building, Siren, Lock, Send, ChevronLeft, ChevronRight, Search, Menu, Bell, Bot, MessageSquare, CreditCard, Mail, Check, ShoppingBag, Coffee, Eye, Utensils, Train, Zap, Gamepad, Edit3, ArrowRight, Database, RefreshCw, PieChart
         } from 'lucide-react';
 
-        // =========================================================================
-        // ⬇️ PASTE ALL OF YOUR FinalDraftV2Mobile CODE BELOW THIS LINE ⬇️
-        // (Start from the 'const apiKey = "";' line down to the end of the component)
-        // =========================================================================
-
         // --- GEMINI API UTILITIES ---
         const apiKey = ""; // API Key injected by environment
-        import React, { useState, useRef, useEffect } from 'react';
-import { 
-  ShieldAlert, 
-  FileText, 
-  Activity, 
-  Globe, 
-  Smartphone, 
-  CheckCircle, 
-  Sparkles,
-  X,
-  Landmark,
-  ArrowRightLeft,
-  ChevronDown,
-  ChevronUp,
-  AlertTriangle,
-  User,
-  Building,
-  Siren,
-  Lock,
-  Send,
-  ChevronLeft,
-  ChevronRight,
-  Search,
-  Menu,
-  Bell,
-  Bot,
-  MessageSquare,
-  CreditCard,
-  Mail,
-  Check,
-  ShoppingBag,
-  Coffee,
-  Eye,
-  Utensils,
-  Train,
-  Zap,
-  Gamepad,
-  Edit3,
-  ArrowRight,
-  Database,
-  RefreshCw,
-  PieChart
-} from 'lucide-react';
 
-// --- GEMINI API UTILITIES ---
-const apiKey = ""; // API Key injected by environment
+        const callGemini = async (prompt, systemInstruction = "") => {
+          try {
+            const response = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  contents: [{ parts: [{ text: prompt }] }],
+                  systemInstruction: { parts: [{ text: systemInstruction }] },
+                }),
+              }
+            );
 
-const callGemini = async (prompt, systemInstruction = "") => {
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          systemInstruction: { parts: [{ text: systemInstruction }] },
-        }),
-      }
-    );
+            if (!response.ok) throw new Error(`API Error: ${response.status}`);
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "Error: No response generated.";
+          } catch (error) {
+            console.error("Gemini API Failed:", error);
+            return null; 
+          }
+        };
 
-    if (!response.ok) throw new Error(`API Error: ${response.status}`);
-    const data = await response.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || "Error: No response generated.";
-  } catch (error) {
-    console.error("Gemini API Failed:", error);
-    return null; // Return null to signal fallback needed
-  }
-};
+        // --- SCENARIO DATA (FinalDraftV2Mobile) ---
+        const SCENARIOS = [
+          {
+            id: "high",
+            type: "HIGH (CRITICAL)",
+            colorTheme: "red",
+            subject: "Viktor Volkov",
+            photoUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400", 
+            kyc: {
+              riskRating: "CRITICAL",
+              nationality: "Russian",
+              citizenship: "Russian Federation",
+              pep: "YES (Foreign Assoc)",
+              sourceLabel: "Source of Wealth", 
+              sourceValue: "Int'l Real Estate",
+              income: "$120,000 (Declared)",
+              creditScore: "780",
+              address: "88 Sentosa Cove Dr",
+              adverseMedia: "2 Hits (OCCRP)",
+              bankrupt: "None",
+              dbChecks: [
+                { name: "MAS Lists", status: "CLEAR", color: "emerald" },
+                { name: "FATF Grey List", status: "MATCH", color: "red" },
+                { name: "OFAC/Sanctions", status: "MATCH", color: "red" }
+              ]
+            },
+            xai: {
+              score: 96,
+              confidence: "97.5% - 99.2%",
+              weights: [
+                { label: "Screening Hits (PEP/Sanctions)", val: 40, color: "bg-red-500" },
+                { label: "Suspicious Txn History", val: 40, color: "bg-red-400" },
+                { label: "Geography Risk", val: 10, color: "bg-orange-400" },
+                { label: "KYC/Nationality", val: 10, color: "bg-slate-500" }
+              ],
+              reasoning: [
+                { title: "Database Match", desc: "Subject flagged as PEP & linked to FATF Grey List jurisdiction. Automatic High Risk classification." },
+                { title: "Structuring & Velocity", desc: "12+ cash deposits just under $20k threshold rapidly consolidated within 24h." },
+                { title: "Layering Link", desc: "Immediate wire to 'Apex Global' (Cayman Isls) with no economic rationale." }
+              ],
+              visualType: "network"
+            },
+            actions: [
+              { label: "FREEZE ACCOUNT (Immediate Block)", subtext: "Prevent imminent capital flight" },
+              { label: "Escalate to DBS MLRO", subtext: "Required for Sanctions/PEP hits" },
+              { label: "Conduct Enhanced Due Diligence (EDD)", subtext: "Unmask UBO of offshore entity" },
+              { label: "Refresh Screening Hits", subtext: "Re-screen against latest OFAC/FATF updates" }
+            ],
+            mainButton: { label: "Generate STR Report", icon: Sparkles, color: "red" },
+            transactions: [
+              { date: "Jan 10", type: "GIRO Deduction", amount: "-$3,500.00", loc: "Sentosa Golf Club", flag: "Normal", flagColor: "slate" },
+              { date: "Jan 11", type: "Visa Spend", amount: "-$4,200.00", loc: "Cortina Watch Marina Bay", flag: "High Value", flagColor: "slate" },
+              { date: "Jan 12", type: "Visa Spend", amount: "-$128.50", loc: "Jumbo Seafood", flag: "Normal", flagColor: "slate" },
+              { date: "Jan 13", type: "Cash Dep", amount: "+$19,500.00", loc: "DBS Orchard Br #881", flag: "Structuring", flagColor: "red" },
+              { date: "Jan 13", type: "Cash Dep", amount: "+$19,800.00", loc: "DBS Somerset Br #102", flag: "Structuring", flagColor: "red" },
+              { date: "Jan 13", type: "Cash Dep", amount: "+$18,900.00", loc: "DBS Bugis Br #212", flag: "Structuring", flagColor: "red" },
+              { date: "Jan 14", type: "Visa Spend", amount: "-$45.00", loc: "Grab *Transport", flag: "Normal", flagColor: "slate" },
+              { date: "Jan 15", type: "Outward Wire", amount: "-$350,000.00", loc: "Apex Global (Cayman)", flag: "Layering", flagColor: "red" }
+            ],
+            creditReport: [
+              { label: "Status", value: "Excellent (High Net Worth)" },
+              { label: "Mortgage", value: "$8.2M (Sentosa Cove) - Serviced Promptly" },
+              { label: "Credit Cards", value: "Amex Centurion - $55k Util (Paid in Full)" },
+              { label: "Alert", value: "High Liquidity, No Defaults" }
+            ]
+          },
+          {
+            id: "medium",
+            type: "MEDIUM RISK",
+            colorTheme: "amber",
+            subject: "Sarah Lin",
+            photoUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=400", 
+            kyc: {
+              riskRating: "MEDIUM (Amber)",
+              nationality: "Singaporean",
+              citizenship: "Singapore Citizen",
+              pep: "NO",
+              sourceLabel: "Source of Funds", 
+              sourceValue: "Freelance Design",
+              income: "$4,500 (Avg)",
+              creditScore: "650 (Rebuilding)",
+              address: "Blk 422 Bedok North",
+              adverseMedia: "None",
+              bankrupt: "Discharged (2022)",
+              dbChecks: [
+                { name: "MAS Lists", status: "CLEAR", color: "emerald" },
+                { name: "FATF Grey List", status: "CLEAR", color: "emerald" },
+                { name: "OFAC/Sanctions", status: "CLEAR", color: "emerald" }
+              ]
+            },
+            xai: {
+              score: 64,
+              confidence: "78.5% - 85.2%",
+              weights: [
+                { label: "Suspicious Txn History", val: 70, color: "bg-amber-500" },
+                { label: "KYC Profile (Freelance)", val: 20, color: "bg-amber-300" },
+                { label: "Geography Risk (Crypto)", val: 10, color: "bg-orange-400" },
+                { label: "Screening Hits", val: 0, color: "bg-slate-700" }
+              ],
+              reasoning: [
+                { title: "Volume Anomaly", desc: "Current month inflows ($50k) exceed 12-month average ($4.5k) by over 1000%." },
+                { title: "Source Mismatch", desc: "Funds received from 'Tech Solutions PL' inconsistent with declared freelance occupation." },
+                { title: "Pass-through Behavior", desc: "80% of inflows moved to Crypto Exchange (Coinhako) within 48h." }
+              ],
+              visualType: "bar"
+            },
+            actions: [
+              { label: "Refresh Screening Hits", subtext: "Check for new adverse media (Top Priority)" },
+              { label: "Place on 30-Day Watchlist", subtext: "Monitor for recurring patterns" },
+              { label: "Request Source of Funds", subtext: "Internally flag for document verification" },
+              { label: "Verify Business Legitimacy", subtext: "Check ACRA records for counterparty" }
+            ],
+            mainButton: { label: "Add to Watchlist", icon: Eye, color: "amber" },
+            transactions: [
+              { date: "Jan 28", type: "Online Spend", amount: "-$29.99", loc: "Adobe Creative Cloud", flag: "Normal", flagColor: "slate" },
+              { date: "Jan 30", type: "Visa Spend", amount: "-$15.40", loc: "SimplyGo *MRT/Bus", flag: "Normal", flagColor: "slate" },
+              { date: "Feb 01", type: "Visa Spend", amount: "-$12.00", loc: "Netflix Subscription", flag: "Normal", flagColor: "slate" },
+              { date: "Feb 02", type: "Inward FAST", amount: "+$50,000.00", loc: "Tech Solutions PL", flag: "Volume Spike", flagColor: "amber" },
+              { date: "Feb 03", type: "Visa Spend", amount: "-$28.50", loc: "Foodpanda", flag: "Normal", flagColor: "slate" },
+              { date: "Feb 04", type: "Outward FAST", amount: "-$40,000.00", loc: "Coinhako", flag: "Crypto Risk", flagColor: "amber" },
+              { date: "Feb 05", type: "PayNow Transfer", amount: "-$45.00", loc: "Ah Seng Durian", flag: "Normal", flagColor: "slate" }
+            ],
+            creditReport: [
+              { label: "Status", value: "Rebuilding (Post-Discharge)" },
+              { label: "Student Loan", value: "$18,000 (Outstanding) - Repayment: On Time" },
+              { label: "Credit Card Balance", value: "$4,200 (UOB One Card) - High Utilization (85%)" },
+              { label: "Previous Bankruptcy", value: "Discharged Jan 2022 (Clean Record since)" }
+            ]
+          },
+          {
+            id: "low",
+            type: "LOW (CLEAR)",
+            colorTheme: "emerald",
+            subject: "John Tan",
+            photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400", 
+            kyc: {
+              riskRating: "LOW (Green)",
+              nationality: "Singaporean",
+              citizenship: "Singapore Citizen",
+              pep: "NO",
+              sourceLabel: "Source of Funds", 
+              sourceValue: "Salary (MNC)",
+              income: "$15,000 (Stable)",
+              creditScore: "820 (Excellent)",
+              address: "10 Claymore Hill",
+              adverseMedia: "None",
+              bankrupt: "None",
+              dbChecks: [
+                { name: "MAS Lists", status: "CLEAR", color: "emerald" },
+                { name: "FATF Grey List", status: "CLEAR", color: "emerald" },
+                { name: "OFAC/Sanctions", status: "CLEAR", color: "emerald" }
+              ]
+            },
+            xai: {
+              score: 15,
+              confidence: "98.8% - 99.5%",
+              weights: [
+                { label: "Txn History (Spike)", val: 80, color: "bg-emerald-500" },
+                { label: "KYC (Stable)", val: 20, color: "bg-emerald-300" },
+                { label: "Screening", val: 0, color: "bg-slate-700" },
+                { label: "Geography", val: 0, color: "bg-slate-700" }
+              ],
+              reasoning: [
+                { title: "False Positive Alert", desc: "Flagged due to single high-value outgoing transaction ($200k)." },
+                { title: "Justification", desc: "Transaction identified as property downpayment to reputable developer." },
+                { title: "No Structuring", desc: "No patterns of smurfing or layering detected." }
+              ],
+              visualType: "line"
+            },
+            actions: [
+              { label: "Refresh Screening Hits", subtext: "Confirm no new sanctions matches (Standard Procedure)" },
+              { label: "Review S&P Agreement", subtext: "Confirm developer details match payment" },
+              { label: "Annotate Case File", subtext: "Log 'False Positive' for model training" },
+              { label: "Adjust Alert Threshold", subtext: "Increase limit to prevent future spam" }
+            ],
+            mainButton: { label: "Clear Alert & Archive", icon: Check, color: "emerald" },
+            transactions: [
+              { date: "Jan 05", type: "GIRO Bill", amount: "-$180.50", loc: "SP Services (Utilities)", flag: "Normal", flagColor: "slate" },
+              { date: "Jan 08", type: "Visa Spend", amount: "-$125.00", loc: "NTUC FairPrice", flag: "Normal", flagColor: "slate" },
+              { date: "Jan 10", type: "GIRO Salary", amount: "+$15,000.00", loc: "Google Asia Pacific", flag: "Normal", flagColor: "slate" },
+              { date: "Jan 11", type: "Visa Spend", amount: "-$22.50", loc: "Starbucks Jewel", flag: "Normal", flagColor: "slate" },
+              { date: "Jan 12", type: "Online Spend", amount: "-$150.00", loc: "Shopee SG", flag: "Normal", flagColor: "slate" },
+              { date: "Jan 13", type: "ATM W/D", amount: "-$50.00", loc: "DBS Plaza Singapura", flag: "Normal", flagColor: "slate" },
+              { date: "Jan 14", type: "Outward Cheque", amount: "-$200,000.00", loc: "City Developments Ltd", flag: "Value Anomaly (Verified)", flagColor: "emerald" },
+              { date: "Jan 15", type: "Visa Spend", amount: "-$5.60", loc: "Toast Box", flag: "Normal", flagColor: "slate" }
+            ],
+            creditReport: [
+              { label: "Status", value: "Good Standing" },
+              { label: "Mortgage", value: "$1.2M (Claymore Hill) - Serviced Promptly" },
+              { label: "Credit Cards", value: "DBS Altitude - $1.2k Util (Low Ratio)" },
+              { label: "Loans", value: "Car Loan (Mercedes C-Class) - Paid Off" }
+            ]
+          }
+        ];
 
-// --- SCENARIO DATA ---
-const SCENARIOS = [
-  {
-    id: "high",
-    type: "HIGH (CRITICAL)",
-    colorTheme: "red",
-    subject: "Viktor Volkov",
-    // Serious, ID-style photo (Russian profile)
-    photoUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400", 
-    kyc: {
-      riskRating: "CRITICAL",
-      nationality: "Russian",
-      citizenship: "Russian Federation",
-      pep: "YES (Foreign Assoc)",
-      sourceLabel: "Source of Wealth", // Wealth for High Net Worth
-      sourceValue: "Int'l Real Estate",
-      income: "$120,000 (Declared)",
-      creditScore: "780",
-      address: "88 Sentosa Cove Dr",
-      adverseMedia: "2 Hits (OCCRP)",
-      bankrupt: "None",
-      dbChecks: [
-        { name: "MAS Lists", status: "CLEAR", color: "emerald" },
-        { name: "FATF Grey List", status: "MATCH", color: "red" },
-        { name: "OFAC/Sanctions", status: "MATCH", color: "red" }
-      ]
-    },
-    xai: {
-      score: 96,
-      confidence: "97.5% - 99.2%",
-      // Weightage Breakdown
-      weights: [
-        { label: "Screening Hits (PEP/Sanctions)", val: 40, color: "bg-red-500" },
-        { label: "Suspicious Txn History", val: 40, color: "bg-red-400" },
-        { label: "Geography Risk", val: 10, color: "bg-orange-400" },
-        { label: "KYC/Nationality", val: 10, color: "bg-slate-500" }
-      ],
-      reasoning: [
-        { title: "Database Match", desc: "Subject flagged as PEP & linked to FATF Grey List jurisdiction. Automatic High Risk classification." },
-        { title: "Structuring & Velocity", desc: "12+ cash deposits just under $20k threshold rapidly consolidated within 24h." },
-        { title: "Layering Link", desc: "Immediate wire to 'Apex Global' (Cayman Isls) with no economic rationale." }
-      ],
-      visualType: "network"
-    },
-    actions: [
-      { label: "FREEZE ACCOUNT (Immediate Block)", subtext: "Prevent imminent capital flight" },
-      { label: "Escalate to DBS MLRO", subtext: "Required for Sanctions/PEP hits" },
-      { label: "Conduct Enhanced Due Diligence (EDD)", subtext: "Unmask UBO of offshore entity" },
-      { label: "Refresh Screening Hits", subtext: "Re-screen against latest OFAC/FATF updates" }
-    ],
-    mainButton: { label: "Generate STR Report", icon: Sparkles, color: "red" },
-    transactions: [
-      { date: "Jan 10", type: "GIRO Deduction", amount: "-$3,500.00", loc: "Sentosa Golf Club", flag: "Normal", flagColor: "slate" },
-      { date: "Jan 11", type: "Visa Spend", amount: "-$4,200.00", loc: "Cortina Watch Marina Bay", flag: "High Value", flagColor: "slate" },
-      { date: "Jan 12", type: "Visa Spend", amount: "-$128.50", loc: "Jumbo Seafood", flag: "Normal", flagColor: "slate" },
-      { date: "Jan 13", type: "Cash Dep", amount: "+$19,500.00", loc: "DBS Orchard Br #881", flag: "Structuring", flagColor: "red" },
-      { date: "Jan 13", type: "Cash Dep", amount: "+$19,800.00", loc: "DBS Somerset Br #102", flag: "Structuring", flagColor: "red" },
-      { date: "Jan 13", type: "Cash Dep", amount: "+$18,900.00", loc: "DBS Bugis Br #212", flag: "Structuring", flagColor: "red" },
-      { date: "Jan 14", type: "Visa Spend", amount: "-$45.00", loc: "Grab *Transport", flag: "Normal", flagColor: "slate" },
-      { date: "Jan 15", type: "Outward Wire", amount: "-$350,000.00", loc: "Apex Global (Cayman)", flag: "Layering", flagColor: "red" }
-    ],
-    creditReport: [
-      { label: "Status", value: "Excellent (High Net Worth)" },
-      { label: "Mortgage", value: "$8.2M (Sentosa Cove) - Serviced Promptly" },
-      { label: "Credit Cards", value: "Amex Centurion - $55k Util (Paid in Full)" },
-      { label: "Alert", value: "High Liquidity, No Defaults" }
-    ]
-  },
-  {
-    id: "medium",
-    type: "MEDIUM RISK",
-    colorTheme: "amber",
-    subject: "Sarah Lin",
-    // Professional Asian female, ID style
-    photoUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=400", 
-    kyc: {
-      riskRating: "MEDIUM (Amber)",
-      nationality: "Singaporean",
-      citizenship: "Singapore Citizen",
-      pep: "NO",
-      sourceLabel: "Source of Funds", // Funds for Income/Freelance
-      sourceValue: "Freelance Design",
-      income: "$4,500 (Avg)",
-      creditScore: "650 (Rebuilding)",
-      address: "Blk 422 Bedok North",
-      adverseMedia: "None",
-      bankrupt: "Discharged (2022)",
-      dbChecks: [
-        { name: "MAS Lists", status: "CLEAR", color: "emerald" },
-        { name: "FATF Grey List", status: "CLEAR", color: "emerald" },
-        { name: "OFAC/Sanctions", status: "CLEAR", color: "emerald" }
-      ]
-    },
-    xai: {
-      score: 64,
-      confidence: "78.5% - 85.2%",
-      // Weightage Breakdown
-      weights: [
-        { label: "Suspicious Txn History", val: 70, color: "bg-amber-500" },
-        { label: "KYC Profile (Freelance)", val: 20, color: "bg-amber-300" },
-        { label: "Geography Risk (Crypto)", val: 10, color: "bg-orange-400" },
-        { label: "Screening Hits", val: 0, color: "bg-slate-700" }
-      ],
-      reasoning: [
-        { title: "Volume Anomaly", desc: "Current month inflows ($50k) exceed 12-month average ($4.5k) by over 1000%." },
-        { title: "Source Mismatch", desc: "Funds received from 'Tech Solutions PL' inconsistent with declared freelance occupation." },
-        { title: "Pass-through Behavior", desc: "80% of inflows moved to Crypto Exchange (Coinhako) within 48h." }
-      ],
-      visualType: "bar"
-    },
-    actions: [
-      { label: "Refresh Screening Hits", subtext: "Check for new adverse media (Top Priority)" },
-      { label: "Place on 30-Day Watchlist", subtext: "Monitor for recurring patterns" },
-      { label: "Request Source of Funds", subtext: "Internally flag for document verification" },
-      { label: "Verify Business Legitimacy", subtext: "Check ACRA records for counterparty" }
-    ],
-    mainButton: { label: "Add to Watchlist", icon: Eye, color: "amber" },
-    transactions: [
-      { date: "Jan 28", type: "Online Spend", amount: "-$29.99", loc: "Adobe Creative Cloud", flag: "Normal", flagColor: "slate" },
-      { date: "Jan 30", type: "Visa Spend", amount: "-$15.40", loc: "SimplyGo *MRT/Bus", flag: "Normal", flagColor: "slate" },
-      { date: "Feb 01", type: "Visa Spend", amount: "-$12.00", loc: "Netflix Subscription", flag: "Normal", flagColor: "slate" },
-      { date: "Feb 02", type: "Inward FAST", amount: "+$50,000.00", loc: "Tech Solutions PL", flag: "Volume Spike", flagColor: "amber" },
-      { date: "Feb 03", type: "Visa Spend", amount: "-$28.50", loc: "Foodpanda", flag: "Normal", flagColor: "slate" },
-      { date: "Feb 04", type: "Outward FAST", amount: "-$40,000.00", loc: "Coinhako", flag: "Crypto Risk", flagColor: "amber" },
-      { date: "Feb 05", type: "PayNow Transfer", amount: "-$45.00", loc: "Ah Seng Durian", flag: "Normal", flagColor: "slate" }
-    ],
-    creditReport: [
-      { label: "Status", value: "Rebuilding (Post-Discharge)" },
-      { label: "Student Loan", value: "$18,000 (Outstanding) - Repayment: On Time" },
-      { label: "Credit Card Balance", value: "$4,200 (UOB One Card) - High Utilization (85%)" },
-      { label: "Previous Bankruptcy", value: "Discharged Jan 2022 (Clean Record since)" }
-    ]
-  },
-  {
-    id: "low",
-    type: "LOW (CLEAR)",
-    colorTheme: "emerald",
-    subject: "John Tan",
-    // Professional Asian male, ID style
-    photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400", 
-    kyc: {
-      riskRating: "LOW (Green)",
-      nationality: "Singaporean",
-      citizenship: "Singapore Citizen",
-      pep: "NO",
-      sourceLabel: "Source of Funds", // Funds for Income
-      sourceValue: "Salary (MNC)",
-      income: "$15,000 (Stable)",
-      creditScore: "820 (Excellent)",
-      address: "10 Claymore Hill",
-      adverseMedia: "None",
-      bankrupt: "None",
-      dbChecks: [
-        { name: "MAS Lists", status: "CLEAR", color: "emerald" },
-        { name: "FATF Grey List", status: "CLEAR", color: "emerald" },
-        { name: "OFAC/Sanctions", status: "CLEAR", color: "emerald" }
-      ]
-    },
-    xai: {
-      score: 15,
-      confidence: "98.8% - 99.5%",
-      // Weightage Breakdown
-      weights: [
-        { label: "Txn History (Spike)", val: 80, color: "bg-emerald-500" },
-        { label: "KYC (Stable)", val: 20, color: "bg-emerald-300" },
-        { label: "Screening", val: 0, color: "bg-slate-700" },
-        { label: "Geography", val: 0, color: "bg-slate-700" }
-      ],
-      reasoning: [
-        { title: "False Positive Alert", desc: "Flagged due to single high-value outgoing transaction ($200k)." },
-        { title: "Justification", desc: "Transaction identified as property downpayment to reputable developer." },
-        { title: "No Structuring", desc: "No patterns of smurfing or layering detected." }
-      ],
-      visualType: "line"
-    },
-    actions: [
-      { label: "Refresh Screening Hits", subtext: "Confirm no new sanctions matches (Standard Procedure)" },
-      { label: "Review S&P Agreement", subtext: "Confirm developer details match payment" },
-      { label: "Annotate Case File", subtext: "Log 'False Positive' for model training" },
-      { label: "Adjust Alert Threshold", subtext: "Increase limit to prevent future spam" }
-    ],
-    mainButton: { label: "Clear Alert & Archive", icon: Check, color: "emerald" },
-    transactions: [
-      { date: "Jan 05", type: "GIRO Bill", amount: "-$180.50", loc: "SP Services (Utilities)", flag: "Normal", flagColor: "slate" },
-      { date: "Jan 08", type: "Visa Spend", amount: "-$125.00", loc: "NTUC FairPrice", flag: "Normal", flagColor: "slate" },
-      { date: "Jan 10", type: "GIRO Salary", amount: "+$15,000.00", loc: "Google Asia Pacific", flag: "Normal", flagColor: "slate" },
-      { date: "Jan 11", type: "Visa Spend", amount: "-$22.50", loc: "Starbucks Jewel", flag: "Normal", flagColor: "slate" },
-      { date: "Jan 12", type: "Online Spend", amount: "-$150.00", loc: "Shopee SG", flag: "Normal", flagColor: "slate" },
-      { date: "Jan 13", type: "ATM W/D", amount: "-$50.00", loc: "DBS Plaza Singapura", flag: "Normal", flagColor: "slate" },
-      { date: "Jan 14", type: "Outward Cheque", amount: "-$200,000.00", loc: "City Developments Ltd", flag: "Value Anomaly (Verified)", flagColor: "emerald" },
-      { date: "Jan 15", type: "Visa Spend", amount: "-$5.60", loc: "Toast Box", flag: "Normal", flagColor: "slate" }
-    ],
-    creditReport: [
-      { label: "Status", value: "Good Standing" },
-      { label: "Mortgage", value: "$1.2M (Claymore Hill) - Serviced Promptly" },
-      { label: "Credit Cards", value: "DBS Altitude - $1.2k Util (Low Ratio)" },
-      { label: "Loans", value: "Car Loan (Mercedes C-Class) - Paid Off" }
-    ]
-  }
-];
+        const AMLDashboard = () => {
+          const [currentScenarioIndex, setCurrentScenarioIndex] = useState(0);
+          const [showModal, setShowModal] = useState(false);
+          const [modalContent, setModalContent] = useState("");
+          const [isTxnExpanded, setIsTxnExpanded] = useState(true);
+          const [isCreditExpanded, setIsCreditExpanded] = useState(true);
+          const [checklist, setChecklist] = useState({});
+          const [isLoading, setIsLoading] = useState(false);
 
-const AMLDashboard = () => {
-  const [currentScenarioIndex, setCurrentScenarioIndex] = useState(0);
-  const [showModal, setShowModal] = useState(false);
-  const [modalContent, setModalContent] = useState("");
-  const [isTxnExpanded, setIsTxnExpanded] = useState(true);
-  const [isCreditExpanded, setIsCreditExpanded] = useState(true);
-  const [checklist, setChecklist] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
+          const currentData = SCENARIOS[currentScenarioIndex];
 
-  const currentData = SCENARIOS[currentScenarioIndex];
+          useEffect(() => {
+            setChecklist({});
+            setIsTxnExpanded(true); 
+            setIsCreditExpanded(true); 
+          }, [currentScenarioIndex]);
 
-  // Reset checklist and UI state when scenario changes
-  useEffect(() => {
-    setChecklist({});
-    setIsTxnExpanded(true); 
-    setIsCreditExpanded(true); 
-  }, [currentScenarioIndex]);
+          const toggleCheck = (index) => {
+            setChecklist(prev => ({ ...prev, [index]: !prev[index] }));
+          };
 
-  const toggleCheck = (index) => {
-    setChecklist(prev => ({ ...prev, [index]: !prev[index] }));
-  };
+          const handleNext = () => {
+            setCurrentScenarioIndex((prev) => (prev + 1) % SCENARIOS.length);
+          };
 
-  const handleNext = () => {
-    setCurrentScenarioIndex((prev) => (prev + 1) % SCENARIOS.length);
-  };
+          const handlePrev = () => {
+            setCurrentScenarioIndex((prev) => (prev - 1 + SCENARIOS.length) % SCENARIOS.length);
+          };
 
-  const handlePrev = () => {
-    setCurrentScenarioIndex((prev) => (prev - 1 + SCENARIOS.length) % SCENARIOS.length);
-  };
+          const handleGenerateAI = async () => {
+            setIsLoading(true);
+            setShowModal(true);
+            setModalContent(""); 
+            
+            let prompt = "";
+            let systemInstruction = "You are an expert AML Compliance Analyst at DBS Bank Singapore.";
 
-  const handleGenerateAI = async () => {
-    setIsLoading(true);
-    setShowModal(true);
-    setModalContent(""); 
-    
-    let prompt = "";
-    let systemInstruction = "You are an expert AML Compliance Analyst at DBS Bank Singapore.";
+            if (currentData.id === "high") {
+              prompt = `Generate a formal Suspicious Transaction Report (STR) for subject ${currentData.subject}. 
+              Risk Factors: ${currentData.xai.reasoning.map(r => r.title + ": " + r.desc).join("; ")}. 
+              Transactions: ${JSON.stringify(currentData.transactions)}. 
+              Format as a formal CDSA Section 39 report to STRO.`;
+            } else if (currentData.id === "medium") {
+              prompt = `Draft an internal compliance memo justifying placing ${currentData.subject} on the 30-day Watchlist. 
+              Reasoning: ${JSON.stringify(currentData.xai.reasoning)}. 
+              Note the large volume spike and crypto pass-through behavior. 
+              Tone: Professional and cautious.`;
+            } else {
+              prompt = `Write a case closure memo for ${currentData.subject}. 
+              Explain that the $200k transaction was verified as a property downpayment. 
+              Recommend clearing the alert as a false positive.`;
+            }
 
-    if (currentData.id === "high") {
-      prompt = `Generate a formal Suspicious Transaction Report (STR) for subject ${currentData.subject}. 
-      Risk Factors: ${currentData.xai.reasoning.map(r => r.title + ": " + r.desc).join("; ")}. 
-      Transactions: ${JSON.stringify(currentData.transactions)}. 
-      Format as a formal CDSA Section 39 report to STRO.`;
-    } else if (currentData.id === "medium") {
-      prompt = `Draft an internal compliance memo justifying placing ${currentData.subject} on the 30-day Watchlist. 
-      Reasoning: ${JSON.stringify(currentData.xai.reasoning)}. 
-      Note the large volume spike and crypto pass-through behavior. 
-      Tone: Professional and cautious.`;
-    } else {
-      prompt = `Write a case closure memo for ${currentData.subject}. 
-      Explain that the $200k transaction was verified as a property downpayment. 
-      Recommend clearing the alert as a false positive.`;
-    }
+            const result = await callGemini(prompt, systemInstruction);
+            setModalContent(result);
+            setIsLoading(false);
+          };
 
-    const result = await callGemini(prompt, systemInstruction);
-    setModalContent(result);
-    setIsLoading(false);
-  };
+          const getColor = (color, opacity = 1) => {
+            const colors = {
+              red: `rgba(239, 68, 68, ${opacity})`,
+              amber: `rgba(245, 158, 11, ${opacity})`,
+              emerald: `rgba(16, 185, 129, ${opacity})`,
+              slate: `rgba(148, 163, 184, ${opacity})`
+            };
+            return colors[color] || colors.slate;
+          };
 
-  // Helper for dynamic colors
-  const getColor = (color, opacity = 1) => {
-    const colors = {
-      red: `rgba(239, 68, 68, ${opacity})`,
-      amber: `rgba(245, 158, 11, ${opacity})`,
-      emerald: `rgba(16, 185, 129, ${opacity})`,
-      slate: `rgba(148, 163, 184, ${opacity})`
-    };
-    return colors[color] || colors.slate;
-  };
-
-  return (
-    <div className="min-h-screen bg-[#0f172a] text-slate-100 font-sans selection:bg-indigo-500 selection:text-white overflow-hidden flex flex-col">
-      
-      {/* HEADER */}
-      <header className="h-16 border-b border-white/10 bg-slate-900/80 backdrop-blur-md flex items-center justify-between px-6 z-20 shadow-lg transition-colors duration-500">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-4 select-none cursor-pointer">
-            {/* DBS LOGO CONSTRUCTION */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-red-600 rounded-sm flex items-center justify-center relative overflow-hidden shrink-0 shadow-md">
-                 <div className="absolute w-[140%] h-[18%] bg-white -rotate-45 top-[28%] -left-[15%]"></div>
-                 <div className="absolute w-[140%] h-[18%] bg-white -rotate-45 bottom-[28%] -right-[15%]"></div>
-              </div>
-              <span className="text-3xl font-bold tracking-tighter text-white">DBS</span>
-            </div>
-          </div>
-          <div className="h-6 w-px bg-white/20 mx-2"></div>
-          <div>
-            <h1 className="text-sm font-bold tracking-wide text-slate-100 uppercase">Group Compliance</h1>
-            <p className="text-[10px] text-indigo-400 font-medium tracking-wider">AML INVESTIGATIONS UNIT</p>
-          </div>
-        </div>
-        
-        {/* RISK NAVIGATOR */}
-        <div className="flex items-center gap-4">
-           <div className="flex items-center bg-slate-800/80 border border-white/10 rounded-lg p-1 backdrop-blur-sm shadow-inner">
-              <button onClick={handlePrev} className="p-1.5 hover:bg-white/10 rounded text-slate-400 hover:text-white transition-colors">
-                <ChevronLeft size={16} />
-              </button>
-              <div className="px-4 flex flex-col items-center w-56">
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Risk Profile</span>
-                <span className={`text-xs font-bold transition-colors duration-300 whitespace-nowrap ${
-                  currentData.id === 'high' ? 'text-red-500 animate-pulse' : 
-                  currentData.id === 'medium' ? 'text-amber-500' : 'text-emerald-500'
-                }`}>
-                  {currentData.type}
-                </span>
-              </div>
-              <button onClick={handleNext} className="p-1.5 hover:bg-white/10 rounded text-slate-400 hover:text-white transition-colors">
-                <ChevronRight size={16} />
-              </button>
-           </div>
-           
-           <div className="h-8 w-8 rounded-full bg-slate-800 flex items-center justify-center border border-white/10 text-slate-400 relative">
-              <Bell size={16} />
-              {currentData.id === 'high' && <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-slate-900"></div>}
-           </div>
-           <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-600 to-blue-500 border border-white/20 shadow-lg"></div>
-        </div>
-      </header>
-
-      {/* MAIN LAYOUT */}
-      <main className="flex-1 flex overflow-hidden">
-        
-        {/* LEFT SIDEBAR - ENHANCED KYC PROFILE */}
-        <aside className="w-80 border-r border-white/10 bg-slate-900/40 flex flex-col p-6 gap-6 overflow-y-auto custom-scrollbar shrink-0">
-          <div>
-            <h2 className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <User size={14} /> Enhanced KYC
-            </h2>
-            <div className={`bg-slate-800/40 border rounded-xl p-5 backdrop-blur-md relative overflow-hidden transition-colors duration-500 ${
-              currentData.id === 'high' ? 'border-red-500/30' : 
-              currentData.id === 'medium' ? 'border-amber-500/30' : 'border-emerald-500/30'
-            }`}>
-              <div className="flex flex-col items-center mb-6">
-                {/* REALISTIC HEADSHOT */}
-                <div className={`w-28 h-28 rounded-full p-1 border-2 shadow-xl mb-3 relative overflow-hidden bg-slate-900 ${
-                   currentData.id === 'high' ? 'border-red-500' : 
-                   currentData.id === 'medium' ? 'border-amber-500' : 'border-emerald-500'
-                }`}>
-                  <img 
-                    src={currentData.photoUrl} 
-                    alt={currentData.subject}
-                    className="w-full h-full object-cover rounded-full opacity-90 hover:opacity-100 transition-opacity"
-                  />
-                  {currentData.kyc.pep.includes("YES") && (
-                    <div className="absolute bottom-0 right-0 bg-red-600 text-[10px] font-bold text-white px-2 py-0.5 rounded-full border border-slate-900 z-10 shadow-lg">PEP</div>
-                  )}
-                </div>
-                <h3 className="text-xl font-bold text-white">{currentData.subject}</h3>
-                <p className="text-xs text-slate-400">ID: SG-2026-{currentData.id === 'high' ? '9921' : currentData.id === 'medium' ? '4412' : '1102'}</p>
-              </div>
-
-              <div className="space-y-4 text-sm">
-                <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                  <span className="text-slate-400 text-xs">Risk Rating</span>
-                  <span className={`font-bold px-2 py-0.5 rounded border ${
-                    currentData.id === 'high' ? 'bg-red-500/10 border-red-500/20 text-red-500' : 
-                    currentData.id === 'medium' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
-                  }`}>{currentData.kyc.riskRating}</span>
-                </div>
-                {/* NATIONALITY & CITIZENSHIP */}
-                <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                  <span className="text-slate-400 text-xs">Nationality</span>
-                  <span className="text-slate-200 text-right text-xs">{currentData.kyc.nationality}</span>
-                </div>
-                <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                  <span className="text-slate-400 text-xs">Citizenship</span>
-                  <span className="text-slate-200 text-right text-xs">{currentData.kyc.citizenship}</span>
-                </div>
-
-                <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                  <span className="text-slate-400 text-xs">PEP Status</span>
-                  <span className="text-slate-200 font-medium">{currentData.kyc.pep}</span>
-                </div>
-                <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                  <span className="text-slate-400 text-xs">{currentData.kyc.sourceLabel}</span>
-                  <span className="text-slate-200 text-right text-xs">{currentData.kyc.sourceValue}</span>
-                </div>
-                <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                  <span className="text-slate-400 text-xs">Mth Income</span>
-                  <span className="text-emerald-400 font-mono text-xs">{currentData.kyc.income}</span>
-                </div>
-                <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                  <span className="text-slate-400 text-xs">Credit Score</span>
-                  <span className="text-indigo-400 font-bold">{currentData.kyc.creditScore}</span>
-                </div>
-                 <div className="flex flex-col gap-1 pt-1">
-                  <span className="text-slate-400 text-xs">Address</span>
-                  <span className="text-slate-300 text-xs leading-snug">{currentData.kyc.address}</span>
+          return (
+            <div className="min-h-screen bg-[#0f172a] text-slate-100 font-sans selection:bg-indigo-500 selection:text-white overflow-hidden flex flex-col">
+              
+              {/* HEADER */}
+              <header className="h-auto lg:h-16 border-b border-white/10 bg-slate-900/80 backdrop-blur-md flex flex-col lg:flex-row items-center justify-between px-4 lg:px-6 py-4 lg:py-0 z-20 shadow-lg transition-colors duration-500 gap-4 lg:gap-0">
+                <div className="flex flex-col lg:flex-row items-center gap-2 lg:gap-6 w-full lg:w-auto">
+                  <div className="flex items-center gap-4 select-none cursor-pointer">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-red-600 rounded-sm flex items-center justify-center relative overflow-hidden shrink-0 shadow-md">
+                         <div className="absolute w-[140%] h-[18%] bg-white -rotate-45 top-[28%] -left-[15%]"></div>
+                         <div className="absolute w-[140%] h-[18%] bg-white -rotate-45 bottom-[28%] -right-[15%]"></div>
+                      </div>
+                      <span className="text-3xl font-bold tracking-tighter text-white">DBS</span>
+                    </div>
+                  </div>
+                  <div className="hidden lg:block h-6 w-px bg-white/20 mx-2"></div>
+                  <div className="text-center lg:text-left">
+                    <h1 className="text-xs lg:text-sm font-bold tracking-wide text-slate-100 uppercase">Group Compliance</h1>
+                    <p className="text-[9px] lg:text-[10px] text-indigo-400 font-medium tracking-wider">AML INVESTIGATIONS UNIT</p>
+                  </div>
                 </div>
                 
-                {/* DATABASE CHECKS SECTION */}
-                <div className="pt-2 border-t border-white/5">
-                   <p className="text-[10px] text-slate-500 uppercase font-bold mb-2">Database Cross-Checks</p>
-                   <div className="space-y-1.5">
-                      {currentData.kyc.dbChecks.map((check, idx) => (
-                         <div key={idx} className="flex justify-between items-center text-xs">
-                            <span className="text-slate-400 flex items-center gap-1.5">
-                               <Database size={10} /> {check.name}
-                            </span>
-                            <span className={`font-bold ${
-                               check.color === 'red' ? 'text-red-500' : 'text-emerald-500'
-                            }`}>{check.status}</span>
-                         </div>
-                      ))}
-                   </div>
-                </div>
-
-                <div className="flex flex-col gap-1 pt-2 border-t border-white/5">
-                  <span className="text-slate-400 text-xs">Adverse Media</span>
-                  <span className={`text-xs ${currentData.kyc.adverseMedia === 'None' ? 'text-slate-500' : 'text-red-400 font-bold'}`}>{currentData.kyc.adverseMedia}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        {/* CENTER HERO - XAI ANALYSIS */}
-        <section className="flex-1 p-8 overflow-y-auto relative flex flex-col gap-6 custom-scrollbar">
-          <div className={`absolute top-0 left-0 w-full h-96 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] pointer-events-none transition-colors duration-700 ${
-             currentData.id === 'high' ? 'from-red-900/20 via-slate-950 to-slate-950' : 
-             currentData.id === 'medium' ? 'from-amber-900/20 via-slate-950 to-slate-950' : 'from-emerald-900/20 via-slate-950 to-slate-950'
-          }`}></div>
-          
-          <div className="max-w-6xl mx-auto w-full space-y-6 relative z-10">
-            
-            {/* HERO CARD */}
-            <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl relative overflow-hidden group">
-              
-              <div className="flex gap-10">
-                {/* LEFT: GAUGE */}
-                <div className="flex flex-col items-center gap-4 shrink-0">
-                   <div className="relative w-48 h-48 flex items-center justify-center">
-                    <svg className="w-full h-full transform -rotate-90">
-                      <circle cx="96" cy="96" r="88" stroke="#1e293b" strokeWidth="16" fill="transparent" />
-                      <circle cx="96" cy="96" r="88" stroke="currentColor" strokeWidth="16" fill="transparent" 
-                        strokeDasharray="552" 
-                        strokeDashoffset={552 - (552 * currentData.xai.score / 100)} 
-                        strokeLinecap="round"
-                        className={`transition-all duration-1000 ease-out drop-shadow-lg ${
-                          currentData.id === 'high' ? 'text-red-500' : 
+                {/* RISK NAVIGATOR */}
+                <div className="flex items-center gap-4 w-full lg:w-auto justify-center lg:justify-end">
+                   <div className="flex items-center bg-slate-800/80 border border-white/10 rounded-lg p-1 backdrop-blur-sm shadow-inner flex-1 lg:flex-none justify-between lg:justify-start">
+                      <button onClick={handlePrev} className="p-1.5 hover:bg-white/10 rounded text-slate-400 hover:text-white transition-colors">
+                        <ChevronLeft size={16} />
+                      </button>
+                      <div className="px-2 lg:px-4 flex flex-col items-center w-full lg:w-56">
+                        <span className="text-[9px] lg:text-[10px] text-slate-500 font-bold uppercase tracking-widest">Risk Profile</span>
+                        <span className={`text-[10px] lg:text-xs font-bold transition-colors duration-300 whitespace-nowrap ${
+                          currentData.id === 'high' ? 'text-red-500 animate-pulse' : 
                           currentData.id === 'medium' ? 'text-amber-500' : 'text-emerald-500'
-                        }`} 
-                      />
-                    </svg>
-                    <div className="absolute flex flex-col items-center">
-                      <span className="text-5xl font-black text-white tracking-tighter">{currentData.xai.score}</span>
-                      <span className="text-sm text-slate-400 font-medium">/ 100</span>
-                      <span className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Risk Score</span>
-                    </div>
-                  </div>
-                  <div className={`px-3 py-1 rounded-full border text-xs font-bold flex items-center gap-2 ${
-                     currentData.id === 'high' ? 'bg-red-500/10 border-red-500/30 text-red-300' : 
-                     currentData.id === 'medium' ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                  }`}>
-                    <Sparkles size={12} /> Confidence: {currentData.xai.confidence}
-                  </div>
+                        }`}>
+                          {currentData.type}
+                        </span>
+                      </div>
+                      <button onClick={handleNext} className="p-1.5 hover:bg-white/10 rounded text-slate-400 hover:text-white transition-colors">
+                        <ChevronRight size={16} />
+                      </button>
+                   </div>
+                   
+                   <div className="h-8 w-8 rounded-full bg-slate-800 flex items-center justify-center border border-white/10 text-slate-400 relative shrink-0">
+                      <Bell size={16} />
+                      {currentData.id === 'high' && <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-slate-900"></div>}
+                   </div>
+                   <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-600 to-blue-500 border border-white/20 shadow-lg shrink-0"></div>
                 </div>
+              </header>
 
-                {/* RIGHT: TEXT & VISUAL EVIDENCE */}
-                <div className="flex-1 flex flex-col justify-between">
-                   <div>
-                      <h2 className="text-2xl font-bold text-white mb-1 flex items-center gap-3">
-                        XAI Analysis & Reasoning
-                        <span className="text-xs font-normal text-slate-500 bg-slate-800 px-2 py-1 rounded border border-white/10">v4.2</span>
-                      </h2>
-                      <div className={`h-px w-full bg-gradient-to-r mb-4 transition-colors duration-500 ${
-                         currentData.id === 'high' ? 'from-red-500/50' : 
-                         currentData.id === 'medium' ? 'from-amber-500/50' : 'from-emerald-500/50'
-                      } to-transparent`}></div>
-                      
-                      {/* SCORE WEIGHTAGE VISUALIZATION */}
-                      <div className="mb-4">
-                         <p className="text-[10px] text-slate-500 uppercase font-bold mb-2 flex items-center gap-1">
-                            <PieChart size={12} /> Score Weightage Breakdown
-                         </p>
-                         <div className="flex h-2 rounded-full overflow-hidden w-full mb-2">
-                            {currentData.xai.weights.map((w, idx) => (
-                               <div key={idx} className={`${w.color}`} style={{ width: `${w.val}%` }}></div>
-                            ))}
-                         </div>
-                         <div className="flex flex-wrap gap-3">
-                            {currentData.xai.weights.map((w, idx) => w.val > 0 && (
-                               <div key={idx} className="flex items-center gap-1.5">
-                                  <div className={`w-2 h-2 rounded-full ${w.color}`}></div>
-                                  <span className="text-[10px] text-slate-400">{w.label} <span className="text-slate-300 font-bold">({w.val}%)</span></span>
-                               </div>
-                            ))}
-                         </div>
+              {/* MAIN LAYOUT */}
+              <main className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden">
+                
+                {/* LEFT SIDEBAR - ENHANCED KYC PROFILE */}
+                <aside className="w-full lg:w-80 border-b lg:border-b-0 lg:border-r border-white/10 bg-slate-900/40 flex flex-col p-6 gap-6 overflow-y-auto custom-scrollbar shrink-0 order-1 lg:order-1">
+                  <div>
+                    <h2 className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                      <User size={14} /> Enhanced KYC
+                    </h2>
+                    <div className={`bg-slate-800/40 border rounded-xl p-5 backdrop-blur-md relative overflow-hidden transition-colors duration-500 ${
+                      currentData.id === 'high' ? 'border-red-500/30' : 
+                      currentData.id === 'medium' ? 'border-amber-500/30' : 'border-emerald-500/30'
+                    }`}>
+                      <div className="flex flex-col items-center mb-6">
+                        <div className={`w-28 h-28 rounded-full p-1 border-2 shadow-xl mb-3 relative overflow-hidden bg-slate-900 ${
+                           currentData.id === 'high' ? 'border-red-500' : 
+                           currentData.id === 'medium' ? 'border-amber-500' : 'border-emerald-500'
+                        }`}>
+                          <img 
+                            src={currentData.photoUrl} 
+                            alt={currentData.subject}
+                            className="w-full h-full object-cover rounded-full opacity-90 hover:opacity-100 transition-opacity"
+                          />
+                          {currentData.kyc.pep.includes("YES") && (
+                            <div className="absolute bottom-0 right-0 bg-red-600 text-[10px] font-bold text-white px-2 py-0.5 rounded-full border border-slate-900 z-10 shadow-lg">PEP</div>
+                          )}
+                        </div>
+                        <h3 className="text-xl font-bold text-white">{currentData.subject}</h3>
+                        <p className="text-xs text-slate-400">ID: SG-2026-{currentData.id === 'high' ? '9921' : currentData.id === 'medium' ? '4412' : '1102'}</p>
                       </div>
 
-                      <ul className="space-y-3 mb-6">
-                        {currentData.xai.reasoning.map((item, idx) => (
-                           <li key={idx} className="flex items-start gap-3 text-sm text-slate-300">
-                             <div className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 shadow-[0_0_8px] ${
-                                currentData.id === 'high' ? 'bg-red-500 text-red-500' : 
-                                currentData.id === 'medium' ? 'bg-amber-500 text-amber-500' : 'bg-emerald-500 text-emerald-500'
-                             }`}></div>
-                             <span><strong className="text-white">{item.title}:</strong> {item.desc}</span>
-                           </li>
-                        ))}
-                      </ul>
-                   </div>
+                      <div className="space-y-4 text-sm">
+                        <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                          <span className="text-slate-400 text-xs">Risk Rating</span>
+                          <span className={`font-bold px-2 py-0.5 rounded border ${
+                            currentData.id === 'high' ? 'bg-red-500/10 border-red-500/20 text-red-500' : 
+                            currentData.id === 'medium' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
+                          }`}>{currentData.kyc.riskRating}</span>
+                        </div>
+                        <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                          <span className="text-slate-400 text-xs">Nationality</span>
+                          <span className="text-slate-200 text-right text-xs">{currentData.kyc.nationality}</span>
+                        </div>
+                        <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                          <span className="text-slate-400 text-xs">Citizenship</span>
+                          <span className="text-slate-200 text-right text-xs">{currentData.kyc.citizenship}</span>
+                        </div>
 
-                   {/* DYNAMIC VISUAL EVIDENCE BOX */}
-                   <div className="bg-black/20 rounded-xl border border-white/5 p-4 relative overflow-hidden h-36 flex items-center justify-center">
-                      <p className="absolute top-2 left-3 text-[10px] text-slate-500 uppercase font-bold tracking-wider">
-                         {currentData.id === 'high' ? 'Fund Flow Topology (Structuring → Layering)' : 
-                          currentData.id === 'medium' ? 'Monthly Inflow vs Average' : 'Income Stability Analysis'}
-                      </p>
-
-                      {/* HIGH RISK: NETWORK GRAPH */}
-                      {currentData.id === 'high' && (
-                        <div className="flex items-center gap-4 mt-6 w-full px-4 justify-between">
-                           {/* STEP 1: SMURFING (INPUTS) */}
-                           <div className="flex flex-col items-center gap-1 w-20 relative group">
-                              <div className="grid grid-cols-2 gap-1.5">
-                                 {[1,2,3,4].map(i => <div key={i} className="w-2.5 h-2.5 rounded-full bg-slate-500 border border-slate-400"></div>)}
-                              </div>
-                              <span className="text-[9px] text-slate-400 text-center leading-tight mt-1">Cash Deps<br/>(Structuring)</span>
-                              {/* Arrow 1 */}
-                              <div className="absolute -right-6 top-3 text-slate-600">
-                                 <ArrowRight size={14} />
-                              </div>
-                           </div>
-
-                           {/* STEP 2: ACCOUNT (CENTER) */}
-                           <div className="flex flex-col items-center z-10">
-                              <div className="w-12 h-12 rounded-lg bg-slate-800 border-2 border-red-500 flex items-center justify-center shadow-[0_0_20px_rgba(220,38,38,0.4)]">
-                                 <Landmark size={20} className="text-white" />
-                              </div>
-                              <span className="text-[10px] text-white font-bold mt-1">Account</span>
-                           </div>
-
-                           {/* STEP 3: LAYERING (OUTPUT) */}
-                           <div className="flex flex-col items-center gap-1 w-20 relative">
-                              {/* Arrow 2 */}
-                              <div className="absolute -left-6 top-3 text-red-500 animate-pulse">
-                                 <ArrowRight size={14} />
-                              </div>
-                              <div className="w-12 h-12 rounded-lg bg-red-900/30 border border-red-500 flex items-center justify-center shadow-[0_0_15px_rgba(220,38,38,0.3)]">
-                                 <Globe size={24} className="text-red-400" />
-                              </div>
-                              <span className="text-[9px] text-red-400 font-bold text-center leading-tight mt-1">Offshore Wire<br/>(Layering)</span>
+                        <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                          <span className="text-slate-400 text-xs">PEP Status</span>
+                          <span className="text-slate-200 font-medium">{currentData.kyc.pep}</span>
+                        </div>
+                        <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                          <span className="text-slate-400 text-xs">{currentData.kyc.sourceLabel}</span>
+                          <span className="text-slate-200 text-right text-xs">{currentData.kyc.sourceValue}</span>
+                        </div>
+                        <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                          <span className="text-slate-400 text-xs">Mth Income</span>
+                          <span className="text-emerald-400 font-mono text-xs">{currentData.kyc.income}</span>
+                        </div>
+                        <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                          <span className="text-slate-400 text-xs">Credit Score</span>
+                          <span className="text-indigo-400 font-bold">{currentData.kyc.creditScore}</span>
+                        </div>
+                         <div className="flex flex-col gap-1 pt-1">
+                          <span className="text-slate-400 text-xs">Address</span>
+                          <span className="text-slate-300 text-xs leading-snug">{currentData.kyc.address}</span>
+                        </div>
+                        
+                        <div className="pt-2 border-t border-white/5">
+                           <p className="text-[10px] text-slate-500 uppercase font-bold mb-2">Database Cross-Checks</p>
+                           <div className="space-y-1.5">
+                              {currentData.kyc.dbChecks.map((check, idx) => (
+                                 <div key={idx} className="flex justify-between items-center text-xs">
+                                    <span className="text-slate-400 flex items-center gap-1.5">
+                                       <Database size={10} /> {check.name}
+                                    </span>
+                                    <span className={`font-bold ${
+                                       check.color === 'red' ? 'text-red-500' : 'text-emerald-500'
+                                    }`}>{check.status}</span>
+                                 </div>
+                              ))}
                            </div>
                         </div>
-                      )}
 
-                      {/* MEDIUM RISK: BAR CHART WITH LABELS */}
-                      {currentData.id === 'medium' && (
-                         <div className="flex items-end gap-12 h-20 mt-4 w-full px-12 justify-center">
-                            {/* Avg */}
-                            <div className="flex flex-col items-center gap-1 group">
-                               <span className="text-[10px] text-slate-400 font-mono mb-0.5">$4.5k</span>
-                               <div className="w-12 bg-slate-700 h-2 rounded-t transition-all group-hover:bg-slate-600"></div>
-                               <span className="text-[10px] text-slate-500 font-bold">Avg</span>
-                            </div>
-                            {/* Dec */}
-                            <div className="flex flex-col items-center gap-1 group">
-                               <span className="text-[10px] text-slate-400 font-mono mb-0.5">$4.2k</span>
-                               <div className="w-12 bg-slate-700 h-2 rounded-t transition-all group-hover:bg-slate-600"></div>
-                               <span className="text-[10px] text-slate-500 font-bold">Dec</span>
-                            </div>
-                            {/* Current */}
-                            <div className="flex flex-col items-center gap-1 relative group">
-                               <div className="absolute -top-7 bg-amber-950 text-amber-500 text-[9px] px-2 py-0.5 rounded border border-amber-500/50 whitespace-nowrap shadow-lg">+1000%</div>
-                               <span className="text-[10px] text-amber-400 font-bold font-mono mb-0.5">$50k</span>
-                               <div className="w-12 bg-amber-500 h-16 rounded-t shadow-[0_0_15px_orange] animate-[pulse_3s_infinite]"></div>
-                               <span className="text-[10px] text-amber-500 font-bold">Jan</span>
-                            </div>
-                         </div>
-                      )}
+                        <div className="flex flex-col gap-1 pt-2 border-t border-white/5">
+                          <span className="text-slate-400 text-xs">Adverse Media</span>
+                          <span className={`text-xs ${currentData.kyc.adverseMedia === 'None' ? 'text-slate-500' : 'text-red-400 font-bold'}`}>{currentData.kyc.adverseMedia}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </aside>
 
-                      {/* LOW RISK: LINE CHART WITH CHECKMARK */}
-                      {currentData.id === 'low' && (
-                         <div className="w-full px-10 mt-6 relative h-20 flex items-end">
-                            {/* Verified Label */}
-                            <div className="absolute top-0 right-16 flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded text-emerald-400 text-[10px] font-bold shadow-sm">
-                               <CheckCircle size={10} /> Verified Property Purchase
-                            </div>
-                            
-                            <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 50">
-                               {/* Base Line */}
-                               <polyline points="0,40 20,41 40,39 60,40 80,40 100,41" fill="none" stroke="#475569" strokeWidth="2" strokeLinecap="round" />
-                               {/* Spike Line */}
-                               <polyline points="75,40 75,10" fill="none" stroke="#10b981" strokeWidth="2" strokeDasharray="3 3" />
-                               {/* Dot */}
-                               <circle cx="75" cy="10" r="3" fill="#10b981" className="animate-pulse" />
+                {/* CENTER HERO - XAI ANALYSIS */}
+                <section className="flex-1 p-4 lg:p-8 overflow-y-auto relative flex flex-col gap-6 custom-scrollbar order-2 lg:order-2">
+                  <div className={`absolute top-0 left-0 w-full h-96 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] pointer-events-none transition-colors duration-700 ${
+                     currentData.id === 'high' ? 'from-red-900/20 via-slate-950 to-slate-950' : 
+                     currentData.id === 'medium' ? 'from-amber-900/20 via-slate-950 to-slate-950' : 'from-emerald-900/20 via-slate-950 to-slate-950'
+                  }`}></div>
+                  
+                  <div className="max-w-6xl mx-auto w-full space-y-6 relative z-10">
+                    
+                    <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-4 lg:p-8 shadow-2xl relative overflow-hidden group">
+                      
+                      <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
+                        {/* LEFT: GAUGE */}
+                        <div className="flex flex-col items-center gap-4 shrink-0">
+                           <div className="relative w-32 h-32 lg:w-48 lg:h-48 flex items-center justify-center">
+                            <svg className="w-full h-full transform -rotate-90">
+                              <circle cx="50%" cy="50%" r="45%" stroke="#1e293b" strokeWidth="12%" fill="transparent" />
+                              <circle cx="50%" cy="50%" r="45%" stroke="currentColor" strokeWidth="12%" fill="transparent" 
+                                strokeDasharray="283%" 
+                                strokeDashoffset={`${283 - (283 * currentData.xai.score / 100)}%`} 
+                                strokeLinecap="round"
+                                className={`transition-all duration-1000 ease-out drop-shadow-lg ${
+                                  currentData.id === 'high' ? 'text-red-500' : 
+                                  currentData.id === 'medium' ? 'text-amber-500' : 'text-emerald-500'
+                                }`} 
+                              />
                             </svg>
-                         </div>
-                      )}
+                            <div className="absolute flex flex-col items-center">
+                              <span className="text-4xl lg:text-5xl font-black text-white tracking-tighter">{currentData.xai.score}</span>
+                              <span className="text-xs lg:text-sm text-slate-400 font-medium">/ 100</span>
+                              <span className="text-[8px] lg:text-[10px] text-slate-500 uppercase tracking-widest mt-1">Risk Score</span>
+                            </div>
+                          </div>
+                          <div className={`px-3 py-1 rounded-full border text-[10px] lg:text-xs font-bold flex items-center gap-2 ${
+                             currentData.id === 'high' ? 'bg-red-500/10 border-red-500/30 text-red-300' : 
+                             currentData.id === 'medium' ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                          }`}>
+                            <Sparkles size={12} /> Confidence: {currentData.xai.confidence}
+                          </div>
+                        </div>
 
-                   </div>
-                </div>
-              </div>
-            </div>
+                        {/* RIGHT: TEXT & VISUAL EVIDENCE */}
+                        <div className="flex-1 flex flex-col justify-between">
+                           <div>
+                              <h2 className="text-lg lg:text-2xl font-bold text-white mb-1 flex items-center gap-3">
+                                XAI Analysis & Reasoning
+                                <span className="text-[10px] lg:text-xs font-normal text-slate-500 bg-slate-800 px-2 py-1 rounded border border-white/10">v4.2</span>
+                              </h2>
+                              <div className={`h-px w-full bg-gradient-to-r mb-4 transition-colors duration-500 ${
+                                 currentData.id === 'high' ? 'from-red-500/50' : 
+                                 currentData.id === 'medium' ? 'from-amber-500/50' : 'from-emerald-500/50'
+                              } to-transparent`}></div>
+                              
+                              <div className="mb-4">
+                                 <p className="text-[10px] text-slate-500 uppercase font-bold mb-2 flex items-center gap-1">
+                                    <PieChart size={12} /> Score Weightage Breakdown
+                                 </p>
+                                 <div className="flex h-2 rounded-full overflow-hidden w-full mb-2">
+                                    {currentData.xai.weights.map((w, idx) => (
+                                       <div key={idx} className={`${w.color}`} style={{ width: `${w.val}%` }}></div>
+                                    ))}
+                                 </div>
+                                 <div className="flex flex-wrap gap-3">
+                                    {currentData.xai.weights.map((w, idx) => w.val > 0 && (
+                                       <div key={idx} className="flex items-center gap-1.5">
+                                          <div className={`w-2 h-2 rounded-full ${w.color}`}></div>
+                                          <span className="text-[10px] text-slate-400">{w.label} <span className="text-slate-300 font-bold">({w.val}%)</span></span>
+                                       </div>
+                                    ))}
+                                 </div>
+                              </div>
 
-            {/* BOTTOM DROPDOWNS */}
-            <div className="space-y-4">
-              
-              {/* TRANSACTION HISTORY */}
-              <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-lg transition-all duration-300">
-                 <button 
-                   onClick={() => setIsTxnExpanded(!isTxnExpanded)}
-                   className="w-full px-6 py-4 border-b border-white/5 bg-white/5 flex justify-between items-center hover:bg-white/10 transition-colors"
-                 >
-                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                       {isTxnExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                       Transaction History
-                    </h3>
-                    <span className="text-xs text-slate-400">Recent Activity</span>
-                 </button>
-
-                 {isTxnExpanded && (
-                   <div className="overflow-x-auto">
-                     <table className="w-full text-sm text-left">
-                       <thead className="text-xs text-slate-500 uppercase bg-slate-950/50">
-                         <tr>
-                           <th className="px-6 py-3 font-medium">Date</th>
-                           <th className="px-6 py-3 font-medium">Type</th>
-                           <th className="px-6 py-3 font-medium">Amount</th>
-                           <th className="px-6 py-3 font-medium">Details</th>
-                           <th className="px-6 py-3 font-medium">Flag</th>
-                         </tr>
-                       </thead>
-                       <tbody className="divide-y divide-white/5 text-slate-300">
-                         {currentData.transactions.map((txn, idx) => (
-                            <tr key={idx} className={`hover:bg-white/5 transition-colors ${idx === currentData.transactions.length - 1 ? 'border-l-2' : ''}`} style={{ borderLeftColor: getColor(txn.flagColor) }}>
-                               <td className="px-6 py-4 font-mono text-slate-400">{txn.date}</td>
-                               <td className="px-6 py-4 flex items-center gap-2">
-                                 {txn.type.includes("Spend") ? <ShoppingBag size={14} className="text-slate-500" /> : 
-                                  txn.type.includes("Dep") ? <ArrowRightLeft size={14} className="text-emerald-500" /> : 
-                                  txn.type.includes("Wire") || txn.type.includes("FAST") ? <Globe size={14} className={txn.type.includes("Inward") ? "text-emerald-500" : "text-red-500"} /> : 
-                                  txn.type.includes("Deduction") ? <Zap size={14} className="text-slate-500" /> : null}
-                                 {txn.type}
-                               </td>
-                               <td className={`px-6 py-4 font-mono font-bold ${txn.amount.includes("+") ? 'text-emerald-400' : 'text-slate-200'}`}>{txn.amount}</td>
-                               <td className="px-6 py-4 text-xs text-slate-400">{txn.loc}</td>
-                               <td className="px-6 py-4">
-                                  <span className={`text-[10px] font-bold border px-2 py-1 rounded bg-opacity-10`} style={{ 
-                                     color: getColor(txn.flagColor), 
-                                     borderColor: getColor(txn.flagColor, 0.3),
-                                     backgroundColor: getColor(txn.flagColor, 0.1)
-                                  }}>
-                                     {txn.flag.toUpperCase()}
-                                  </span>
-                               </td>
-                            </tr>
-                         ))}
-                       </tbody>
-                     </table>
-                   </div>
-                 )}
-              </div>
-
-              {/* CREDIT REPORT */}
-              <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-lg transition-all duration-300">
-                 <button 
-                   onClick={() => setIsCreditExpanded(!isCreditExpanded)}
-                   className="w-full px-6 py-4 border-b border-white/5 bg-white/5 flex justify-between items-center hover:bg-white/10 transition-colors"
-                 >
-                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                       {isCreditExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                       Credit Report Summary
-                    </h3>
-                    <span className="text-xs text-slate-400">External Bureau Data</span>
-                 </button>
-
-                 {isCreditExpanded && (
-                    <div className="p-6">
-                       <div className="grid grid-cols-2 gap-6">
-                         {currentData.creditReport.map((item, idx) => (
-                           <div key={idx} className="bg-slate-800/50 p-4 rounded-lg border border-white/10">
-                              <span className="text-xs text-slate-500 uppercase">{item.label}</span>
-                              <p className="text-sm font-bold text-white mt-1">{item.value}</p>
+                              <ul className="space-y-3 mb-6">
+                                {currentData.xai.reasoning.map((item, idx) => (
+                                   <li key={idx} className="flex items-start gap-3 text-xs lg:text-sm text-slate-300">
+                                     <div className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 shadow-[0_0_8px] ${
+                                        currentData.id === 'high' ? 'bg-red-500 text-red-500' : 
+                                        currentData.id === 'medium' ? 'bg-amber-500 text-amber-500' : 'bg-emerald-500 text-emerald-500'
+                                     }`}></div>
+                                     <span><strong className="text-white">{item.title}:</strong> {item.desc}</span>
+                                   </li>
+                                ))}
+                              </ul>
                            </div>
-                         ))}
-                       </div>
+
+                           <div className="bg-black/20 rounded-xl border border-white/5 p-4 relative overflow-hidden h-36 flex items-center justify-center">
+                              <p className="absolute top-2 left-3 text-[8px] lg:text-[10px] text-slate-500 uppercase font-bold tracking-wider">
+                                 {currentData.id === 'high' ? 'Fund Flow Topology (Structuring → Layering)' : 
+                                  currentData.id === 'medium' ? 'Monthly Inflow vs Average' : 'Income Stability Analysis'}
+                              </p>
+
+                              {currentData.id === 'high' && (
+                                <div className="flex items-center gap-2 lg:gap-4 mt-6 w-full px-2 lg:px-4 justify-between">
+                                   <div className="flex flex-col items-center gap-1 w-16 lg:w-20 relative group">
+                                      <div className="grid grid-cols-2 gap-1.5">
+                                         {[1,2,3,4].map(i => <div key={i} className="w-2.5 h-2.5 rounded-full bg-slate-500 border border-slate-400"></div>)}
+                                      </div>
+                                      <span className="text-[8px] lg:text-[9px] text-slate-400 text-center leading-tight mt-1">Cash Deps<br/>(Structuring)</span>
+                                      <div className="absolute -right-4 lg:-right-6 top-3 text-slate-600">
+                                         <ArrowRight size={14} />
+                                      </div>
+                                   </div>
+
+                                   <div className="flex flex-col items-center z-10">
+                                      <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg bg-slate-800 border-2 border-red-500 flex items-center justify-center shadow-[0_0_20px_rgba(220,38,38,0.4)]">
+                                         <Landmark size={18} className="text-white" />
+                                      </div>
+                                      <span className="text-[8px] lg:text-[10px] text-white font-bold mt-1">Account</span>
+                                   </div>
+
+                                   <div className="flex flex-col items-center gap-1 w-16 lg:w-20 relative">
+                                      <div className="absolute -left-4 lg:-left-6 top-3 text-red-500 animate-pulse">
+                                         <ArrowRight size={14} />
+                                      </div>
+                                      <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg bg-red-900/30 border border-red-500 flex items-center justify-center shadow-[0_0_15px_rgba(220,38,38,0.3)]">
+                                         <Globe size={20} className="text-red-400" />
+                                      </div>
+                                      <span className="text-[8px] lg:text-[9px] text-red-400 font-bold text-center leading-tight mt-1">Offshore Wire<br/>(Layering)</span>
+                                   </div>
+                                </div>
+                              )}
+
+                              {currentData.id === 'medium' && (
+                                 <div className="flex items-end gap-6 lg:gap-12 h-20 mt-4 w-full px-4 lg:px-12 justify-center">
+                                    <div className="flex flex-col items-center gap-1 group">
+                                       <span className="text-[8px] lg:text-[10px] text-slate-400 font-mono mb-0.5">$4.5k</span>
+                                       <div className="w-8 lg:w-12 bg-slate-700 h-2 rounded-t transition-all group-hover:bg-slate-600"></div>
+                                       <span className="text-[8px] lg:text-[10px] text-slate-500 font-bold">Avg</span>
+                                    </div>
+                                    <div className="flex flex-col items-center gap-1 group">
+                                       <span className="text-[8px] lg:text-[10px] text-slate-400 font-mono mb-0.5">$4.2k</span>
+                                       <div className="w-8 lg:w-12 bg-slate-700 h-2 rounded-t transition-all group-hover:bg-slate-600"></div>
+                                       <span className="text-[8px] lg:text-[10px] text-slate-500 font-bold">Dec</span>
+                                    </div>
+                                    <div className="flex flex-col items-center gap-1 relative group">
+                                       <div className="absolute -top-7 bg-amber-950 text-amber-500 text-[8px] lg:text-[9px] px-2 py-0.5 rounded border border-amber-500/50 whitespace-nowrap shadow-lg">+1000%</div>
+                                       <span className="text-[8px] lg:text-[10px] text-amber-400 font-bold font-mono mb-0.5">$50k</span>
+                                       <div className="w-8 lg:w-12 bg-amber-500 h-16 rounded-t shadow-[0_0_15px_orange] animate-[pulse_3s_infinite]"></div>
+                                       <span className="text-[8px] lg:text-[10px] text-amber-500 font-bold">Jan</span>
+                                    </div>
+                                 </div>
+                              )}
+
+                              {currentData.id === 'low' && (
+                                 <div className="w-full px-4 lg:px-10 mt-6 relative h-20 flex items-end">
+                                    <div className="absolute top-0 right-8 lg:right-16 flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded text-emerald-400 text-[8px] lg:text-[10px] font-bold shadow-sm">
+                                       <CheckCircle size={10} /> Verified Property Purchase
+                                    </div>
+                                    
+                                    <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 50">
+                                       <polyline points="0,40 20,41 40,39 60,40 80,40 100,41" fill="none" stroke="#475569" strokeWidth="2" strokeLinecap="round" />
+                                       <polyline points="75,40 75,10" fill="none" stroke="#10b981" strokeWidth="2" strokeDasharray="3 3" />
+                                       <circle cx="75" cy="10" r="3" fill="#10b981" className="animate-pulse" />
+                                    </svg>
+                                 </div>
+                              )}
+
+                           </div>
+                        </div>
+                      </div>
                     </div>
-                 )}
-              </div>
 
-            </div>
+                    {/* BOTTOM DROPDOWNS */}
+                    <div className="space-y-4">
+                      
+                      <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-lg transition-all duration-300">
+                         <button 
+                           onClick={() => setIsTxnExpanded(!isTxnExpanded)}
+                           className="w-full px-4 lg:px-6 py-4 border-b border-white/5 bg-white/5 flex justify-between items-center hover:bg-white/10 transition-colors"
+                         >
+                            <h3 className="text-xs lg:text-sm font-bold text-white flex items-center gap-2">
+                               {isTxnExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                               Transaction History
+                            </h3>
+                            <span className="text-[10px] lg:text-xs text-slate-400">Recent Activity</span>
+                         </button>
 
-          </div>
-        </section>
+                         {isTxnExpanded && (
+                           <div className="overflow-x-auto">
+                             <table className="w-full text-xs lg:text-sm text-left whitespace-nowrap lg:whitespace-normal">
+                               <thead className="text-[10px] lg:text-xs text-slate-500 uppercase bg-slate-950/50">
+                                 <tr>
+                                   <th className="px-4 lg:px-6 py-3 font-medium">Date</th>
+                                   <th className="px-4 lg:px-6 py-3 font-medium">Type</th>
+                                   <th className="px-4 lg:px-6 py-3 font-medium">Amount</th>
+                                   <th className="px-4 lg:px-6 py-3 font-medium">Details</th>
+                                   <th className="px-4 lg:px-6 py-3 font-medium">Flag</th>
+                                 </tr>
+                               </thead>
+                               <tbody className="divide-y divide-white/5 text-slate-300">
+                                 {currentData.transactions.map((txn, idx) => (
+                                    <tr key={idx} className={`hover:bg-white/5 transition-colors ${idx === currentData.transactions.length - 1 ? 'border-l-2' : ''}`} style={{ borderLeftColor: getColor(txn.flagColor) }}>
+                                       <td className="px-4 lg:px-6 py-4 font-mono text-slate-400">{txn.date}</td>
+                                       <td className="px-4 lg:px-6 py-4 flex items-center gap-2">
+                                         {txn.type.includes("Spend") ? <ShoppingBag size={14} className="text-slate-500" /> : 
+                                          txn.type.includes("Dep") ? <ArrowRightLeft size={14} className="text-emerald-500" /> : 
+                                          txn.type.includes("Wire") || txn.type.includes("FAST") ? <Globe size={14} className={txn.type.includes("Inward") ? "text-emerald-500" : "text-red-500"} /> : 
+                                          txn.type.includes("Deduction") ? <Zap size={14} className="text-slate-500" /> : null}
+                                         {txn.type}
+                                       </td>
+                                       <td className={`px-4 lg:px-6 py-4 font-mono font-bold ${txn.amount.includes("+") ? 'text-emerald-400' : 'text-slate-200'}`}>{txn.amount}</td>
+                                       <td className="px-4 lg:px-6 py-4 text-xs text-slate-400">{txn.loc}</td>
+                                       <td className="px-4 lg:px-6 py-4">
+                                          <span className={`text-[9px] lg:text-[10px] font-bold border px-2 py-1 rounded bg-opacity-10`} style={{ 
+                                             color: getColor(txn.flagColor), 
+                                             borderColor: getColor(txn.flagColor, 0.3),
+                                             backgroundColor: getColor(txn.flagColor, 0.1)
+                                          }}>
+                                             {txn.flag.toUpperCase()}
+                                          </span>
+                                       </td>
+                                    </tr>
+                                 ))}
+                               </tbody>
+                             </table>
+                           </div>
+                         )}
+                      </div>
 
-        {/* RIGHT SIDEBAR - ACTION CONSOLE */}
-        <aside className="w-80 bg-slate-900 border-l border-white/10 flex flex-col shadow-2xl shrink-0">
-          <div className="p-6 border-b border-white/10 bg-indigo-900/10">
-            <h2 className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-              <Siren size={14} /> MAS 626 Action Console
-            </h2>
-            <p className="text-[10px] text-slate-500">Regulatory Framework: CDSA / TSA</p>
-          </div>
+                      <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-lg transition-all duration-300">
+                         <button 
+                           onClick={() => setIsCreditExpanded(!isCreditExpanded)}
+                           className="w-full px-4 lg:px-6 py-4 border-b border-white/5 bg-white/5 flex justify-between items-center hover:bg-white/10 transition-colors"
+                         >
+                            <h3 className="text-xs lg:text-sm font-bold text-white flex items-center gap-2">
+                               {isCreditExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                               Credit Report Summary
+                            </h3>
+                            <span className="text-[10px] lg:text-xs text-slate-400">External Bureau Data</span>
+                         </button>
 
-          <div className="p-6 flex-1 space-y-6">
-            <div className="space-y-3">
-               {currentData.actions.map((action, idx) => (
-                  <label key={idx} className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
-                     checklist[idx] ? `bg-${currentData.colorTheme}-500/20 border-${currentData.colorTheme}-500 shadow-[0_0_15px_rgba(0,0,0,0.2)]` : 'bg-slate-800/40 border-white/10 hover:border-white/20'
+                         {isCreditExpanded && (
+                            <div className="p-4 lg:p-6">
+                               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+                                 {currentData.creditReport.map((item, idx) => (
+                                   <div key={idx} className="bg-slate-800/50 p-4 rounded-lg border border-white/10">
+                                      <span className="text-xs text-slate-500 uppercase">{item.label}</span>
+                                      <p className="text-sm font-bold text-white mt-1">{item.value}</p>
+                                   </div>
+                                 ))}
+                               </div>
+                            </div>
+                         )}
+                      </div>
+
+                    </div>
+
+                  </div>
+                </section>
+
+                {/* RIGHT SIDEBAR - ACTION CONSOLE */}
+                <aside className="w-full lg:w-80 bg-slate-900 border-t lg:border-t-0 lg:border-l border-white/10 flex flex-col shadow-2xl z-20 order-3 lg:order-3">
+                  <div className="p-6 border-b border-white/10 bg-indigo-900/10">
+                    <h2 className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+                      <Siren size={14} /> MAS 626 Action Console
+                    </h2>
+                    <p className="text-[10px] text-slate-500">Regulatory Framework: CDSA / TSA</p>
+                  </div>
+
+                  <div className="p-6 flex-1 space-y-6">
+                    <div className="space-y-3">
+                       {currentData.actions.map((action, idx) => (
+                          <label key={idx} className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
+                             checklist[idx] ? `bg-${currentData.colorTheme}-500/20 border-${currentData.colorTheme}-500 shadow-[0_0_15px_rgba(0,0,0,0.2)]` : 'bg-slate-800/40 border-white/10 hover:border-white/20'
+                          }`}>
+                            <div className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition-colors shrink-0 ${
+                               checklist[idx] ? `bg-${currentData.colorTheme}-600 border-${currentData.colorTheme}-600` : 'border-slate-500'
+                            }`}
+                                onClick={() => toggleCheck(idx)}>
+                              {checklist[idx] && <CheckCircle size={12} className="text-white" />}
+                            </div>
+                            <div>
+                              <p className={`text-sm font-bold ${checklist[idx] ? 'text-white' : 'text-slate-300'}`}>{idx + 1}. {action.label}</p>
+                              <p className="text-[10px] text-slate-500 mt-1">{action.subtext}</p>
+                            </div>
+                          </label>
+                       ))}
+                    </div>
+                  </div>
+
+                  <div className="p-6 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent">
+                    <button 
+                      onClick={handleGenerateAI}
+                      className={`w-full group relative py-4 px-6 rounded-xl text-white font-bold transition-all shadow-lg overflow-hidden border border-white/20 ${
+                         currentData.id === 'high' ? 'bg-red-600 hover:bg-red-500 shadow-red-500/20' : 
+                         currentData.id === 'medium' ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-500/20' : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20'
+                      }`}
+                    >
+                      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] bg-[length:250%_250%,100%_100%] animate-[shimmer_2s_linear_infinite]"></div>
+                      <div className="flex items-center justify-center gap-2 relative z-10">
+                        <currentData.mainButton.icon size={18} className="text-white" />
+                        <span>{currentData.mainButton.label}</span>
+                      </div>
+                    </button>
+                    <p className="text-[10px] text-center text-slate-500 mt-3 font-mono">SECURE • ENCRYPTED • AUDITED</p>
+                  </div>
+                </aside>
+
+              </main>
+
+              {/* AI GENERATION MODAL */}
+              {showModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+                  <div className={`bg-slate-900 border w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] ${
+                     currentData.id === 'high' ? 'border-red-500/50' : 
+                     currentData.id === 'medium' ? 'border-amber-500/50' : 'border-emerald-500/50'
                   }`}>
-                    <div className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition-colors shrink-0 ${
-                       checklist[idx] ? `bg-${currentData.colorTheme}-600 border-${currentData.colorTheme}-600` : 'border-slate-500'
-                    }`}
-                        onClick={() => toggleCheck(idx)}>
-                      {checklist[idx] && <CheckCircle size={12} className="text-white" />}
+                    
+                    <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5 rounded-t-2xl">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${
+                           currentData.id === 'high' ? 'bg-red-600' : 
+                           currentData.id === 'medium' ? 'bg-amber-600' : 'bg-emerald-600'
+                        }`}>
+                          <Bot className="text-white" size={24} />
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-white tracking-tight">Agentic AI Draft</h3>
+                          <p className="text-xs text-slate-400 font-mono">Context: {currentData.id.toUpperCase()} Risk Protocol</p>
+                        </div>
+                      </div>
+                      <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 rounded-lg">
+                        <X size={20} />
+                      </button>
                     </div>
-                    <div>
-                      <p className={`text-sm font-bold ${checklist[idx] ? 'text-white' : 'text-slate-300'}`}>{idx + 1}. {action.label}</p>
-                      <p className="text-[10px] text-slate-500 mt-1">{action.subtext}</p>
+
+                    <div className="p-8 overflow-y-auto bg-slate-950/50 relative min-h-[300px]">
+                       {isLoading ? (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                             <div className={`w-12 h-12 border-4 border-t-transparent rounded-full animate-spin ${
+                                currentData.id === 'high' ? 'border-red-500' : 
+                                currentData.id === 'medium' ? 'border-amber-500' : 'border-emerald-500'
+                             }`}></div>
+                             <p className="text-slate-400 text-sm animate-pulse">Analyzing Transaction Topology...</p>
+                          </div>
+                       ) : (
+                          <div className="relative group">
+                             <textarea
+                                value={modalContent}
+                                onChange={(e) => setModalContent(e.target.value)}
+                                className="w-full h-96 bg-slate-900 border border-slate-700 p-6 rounded-xl font-mono text-sm leading-relaxed text-slate-300 shadow-inner focus:outline-none focus:border-indigo-500 resize-none"
+                             />
+                             <div className="absolute top-4 right-4 bg-slate-800/80 px-2 py-1 rounded text-xs text-slate-400 pointer-events-none flex items-center gap-1">
+                                <Edit3 size={12} /> Editable Mode
+                             </div>
+                          </div>
+                       )}
                     </div>
-                  </label>
-               ))}
-            </div>
-          </div>
 
-          <div className="p-6 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent">
-            <button 
-              onClick={handleGenerateAI}
-              className={`w-full group relative py-4 px-6 rounded-xl text-white font-bold transition-all shadow-lg overflow-hidden border border-white/20 ${
-                 currentData.id === 'high' ? 'bg-red-600 hover:bg-red-500 shadow-red-500/20' : 
-                 currentData.id === 'medium' ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-500/20' : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20'
-              }`}
-            >
-              <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] bg-[length:250%_250%,100%_100%] animate-[shimmer_2s_linear_infinite]"></div>
-              <div className="flex items-center justify-center gap-2 relative z-10">
-                <currentData.mainButton.icon size={18} className="text-white" />
-                <span>{currentData.mainButton.label}</span>
-              </div>
-            </button>
-            <p className="text-[10px] text-center text-slate-500 mt-3 font-mono">SECURE • ENCRYPTED • AUDITED</p>
-          </div>
-        </aside>
+                    <div className="p-6 border-t border-white/10 flex justify-end gap-3 bg-slate-900 rounded-b-2xl">
+                      <button 
+                        onClick={() => setShowModal(false)}
+                        className="px-6 py-3 text-sm font-bold text-slate-400 hover:text-white transition-colors hover:bg-white/5 rounded-lg"
+                      >
+                        Discard
+                      </button>
+                      <button 
+                        className={`px-8 py-3 text-sm font-bold text-white rounded-lg shadow-lg flex items-center gap-2 ${
+                           currentData.id === 'high' ? 'bg-red-600 hover:bg-red-500 shadow-red-500/20' : 
+                           currentData.id === 'medium' ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-500/20' : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20'
+                        }`}
+                        onClick={() => {
+                           alert("Action Confirmed & Logged.");
+                           setShowModal(false);
+                        }}
+                      >
+                        <Check size={16} />
+                        Confirm Action
+                      </button>
+                    </div>
 
-      </main>
-
-      {/* AI GENERATION MODAL */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <div className={`bg-slate-900 border w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] ${
-             currentData.id === 'high' ? 'border-red-500/50' : 
-             currentData.id === 'medium' ? 'border-amber-500/50' : 'border-emerald-500/50'
-          }`}>
-            
-            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5 rounded-t-2xl">
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${
-                   currentData.id === 'high' ? 'bg-red-600' : 
-                   currentData.id === 'medium' ? 'bg-amber-600' : 'bg-emerald-600'
-                }`}>
-                  <Bot className="text-white" size={24} />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white tracking-tight">Agentic AI Draft</h3>
-                  <p className="text-xs text-slate-400 font-mono">Context: {currentData.id.toUpperCase()} Risk Protocol</p>
-                </div>
-              </div>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 rounded-lg">
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="p-8 overflow-y-auto bg-slate-950/50 relative min-h-[300px]">
-               {isLoading ? (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-                     <div className={`w-12 h-12 border-4 border-t-transparent rounded-full animate-spin ${
-                        currentData.id === 'high' ? 'border-red-500' : 
-                        currentData.id === 'medium' ? 'border-amber-500' : 'border-emerald-500'
-                     }`}></div>
-                     <p className="text-slate-400 text-sm animate-pulse">Analyzing Transaction Topology...</p>
                   </div>
-               ) : (
-                  <div className="relative group">
-                     {/* EDITABLE TEXTAREA */}
-                     <textarea
-                        value={modalContent}
-                        onChange={(e) => setModalContent(e.target.value)}
-                        className="w-full h-96 bg-slate-900 border border-slate-700 p-6 rounded-xl font-mono text-sm leading-relaxed text-slate-300 shadow-inner focus:outline-none focus:border-indigo-500 resize-none"
-                     />
-                     <div className="absolute top-4 right-4 bg-slate-800/80 px-2 py-1 rounded text-xs text-slate-400 pointer-events-none flex items-center gap-1">
-                        <Edit3 size={12} /> Editable Mode
-                     </div>
-                  </div>
-               )}
+                </div>
+              )}
+
+              <style>{`
+                @keyframes shimmer {
+                  0% { background-position: 100% 100%; }
+                  100% { background-position: 0% 0%; }
+                }
+                .custom-scrollbar::-webkit-scrollbar {
+                  width: 6px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                  background: rgba(255, 255, 255, 0.05);
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                  background: rgba(255, 255, 255, 0.1);
+                  border-radius: 10px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                  background: rgba(255, 255, 255, 0.2);
+                }
+              `}</style>
             </div>
+          );
+        };
 
-            <div className="p-6 border-t border-white/10 flex justify-end gap-3 bg-slate-900 rounded-b-2xl">
-              <button 
-                onClick={() => setShowModal(false)}
-                className="px-6 py-3 text-sm font-bold text-slate-400 hover:text-white transition-colors hover:bg-white/5 rounded-lg"
-              >
-                Discard
-              </button>
-              <button 
-                className={`px-8 py-3 text-sm font-bold text-white rounded-lg shadow-lg flex items-center gap-2 ${
-                   currentData.id === 'high' ? 'bg-red-600 hover:bg-red-500 shadow-red-500/20' : 
-                   currentData.id === 'medium' ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-500/20' : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20'
-                }`}
-                onClick={() => {
-                   alert("Action Confirmed & Logged.");
-                   setShowModal(false);
-                }}
-              >
-                <Check size={16} />
-                Confirm Action
-              </button>
-            </div>
-
-          </div>
-        </div>
-      )}
-
-      <style>{`
-        @keyframes shimmer {
-          0% { background-position: 100% 100%; }
-          100% { background-position: 0% 0%; }
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.05);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.2);
-        }
-      `}</style>
-    </div>
-  );
-};
-
-export default AMLDashboard;
-        // ... (Paste the rest of FinalDraftV2Mobile here, stopping right before 'export default AMLDashboard;') ...
-
-        // =========================================================================
-        // ⬆️ PASTE ALL OF YOUR FinalDraftV2Mobile CODE ABOVE THIS LINE ⬆️
-        // =========================================================================
-
-        // Render the app to the screen
         const root = createRoot(document.getElementById('root'));
         root.render(<AMLDashboard />);
     </script>
